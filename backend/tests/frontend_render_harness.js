@@ -321,6 +321,9 @@ function pageScripts(html, root) {
   let m;
   while ((m = re.exec(html)) !== null) {
     const attrs = m[1] || '';
+    // JSON-LD is a data block; browsers do not execute it as JavaScript.
+    const typeMatch = attrs.match(/\btype\s*=\s*["']([^"']+)["']/i);
+    if (typeMatch && typeMatch[1].trim().toLowerCase() === 'application/ld+json') continue;
     const srcMatch = attrs.match(/\bsrc\s*=\s*["']([^"']+)["']/i);
     if (srcMatch) {
       const src = srcMatch[1].split('?')[0];
@@ -496,8 +499,11 @@ async function main() {
       clearTimeout(id);
     },
     navigator: {
-      clipboard: {
+      clipboard: scenario.clipboard === false ? null : {
         writeText(text) {
+          if (scenario.clipboardReject) {
+            return Promise.reject(new Error('Clipboard write rejected'));
+          }
           clipboardWrites.push(String(text));
           return Promise.resolve();
         },
@@ -812,6 +818,20 @@ async function main() {
         continue;
       }
       bubbleToDocument(makeEvent('click', target, eventPathOf(target)), errors);
+      await settle(0);
+      continue;
+    }
+
+    if (call.dispatchKeydown) {
+      const key = typeof call.dispatchKeydown === 'string' ? call.dispatchKeydown : (call.dispatchKeydown.key || 'Escape');
+      const event = { type: 'keydown', key: key };
+      documentHandlers.filter((h) => h.type === 'keydown').forEach((h) => {
+        try {
+          h.fn(event);
+        } catch (e) {
+          errors.push(`keydown: ${e && e.message ? e.message : String(e)}`);
+        }
+      });
       await settle(0);
       continue;
     }

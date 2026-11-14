@@ -37,7 +37,7 @@ GITHUB = "Continue with GitHub"
 EMAIL = "Continue with email"
 NO_PASSWORD = "No password required."
 
-EMAIL_START = {"/auth/email/start": {"status": 200, "body": {"ok": True}}}
+EMAIL_START = {"/auth/email/start": {"status": 200, "body": {"ok": True, "sent": True}}}
 
 
 def run(tmp_path, page, calls, fetch=None, location="/", read=None):
@@ -249,6 +249,24 @@ def test_email_send_failure_keeps_the_form_and_says_so(tmp_path):
         if m.get("tag") == "BUTTON" and "Email me a sign-in link" in (m.get("text") or "")
     ]
     assert send_buttons and send_buttons[0]["disabled"] is False
+
+
+def test_email_start_sent_false_does_not_fire_sent_events(tmp_path):
+    """When /auth/email/start succeeds with sent: false (cooldown/send failure), no sent event is fired."""
+    result = run(
+        tmp_path,
+        "project_detail.html",
+        [
+            {"fn": "showInlineLoginPrompt", "args": []},
+            *EMAIL_OPS,
+        ],
+        fetch={"/auth/email/start": {"status": 200, "body": {"ok": True, "sent": False}}},
+        location="/project/1",
+    )
+    assert len(email_posts(result)) == 1
+    assert "Check your inbox" in result["html"]
+    assert len(events(result, "email_verification_sent")) == 0
+    assert len(events(result, "login_started")) == 0
 
 
 # ---------------------------------------------------------------------------
@@ -513,6 +531,23 @@ def test_desktop_nav_menu_still_opens_and_closes(tmp_path):
     )
     assert closed["flags"]["nav-login-menu"]["hidden"] is True
     assert closed["flags"]["login-btn"]["ariaExpanded"] == "false"
+
+
+def test_mobile_nav_closes_on_escape_and_restores_focus(tmp_path):
+    """Pressing Escape collapses the mobile nav and returns focus to the toggle button (fixes #338)."""
+    result = run(
+        tmp_path,
+        "index.html",
+        [
+            {"clickId": "navbar-toggle"},
+            {"dispatchKeydown": {"key": "Escape"}},
+        ],
+    )
+    assert result["flags"]["navbar-toggle"]["ariaExpanded"] == "false"
+    assert "navbar-nav-open" not in (result["flags"]["navbar-nav"]["className"] or "")
+    assert result["focused"] is not None
+    assert result["focused"]["id"] == "navbar-toggle"
+
 
 
 # ---------------------------------------------------------------------------
@@ -825,14 +860,15 @@ def test_resend_after_cooldown_sends_another_link_and_announces_it(tmp_path):
         ],
         fetch={
             "/auth/email/start": [
-                {"status": 200, "body": {"ok": True}},
-                {"status": 200, "body": {"ok": True}},
+                {"status": 200, "body": {"ok": True, "sent": True}},
+                {"status": 200, "body": {"ok": True, "sent": True}},
             ]
         },
     )
     assert len(email_posts(result)) == 2, result["requests"]
     assert "A new sign-in link is on its way. Check your inbox." in result["html"]
     assert "Resend in" in result["html"]
+    assert len(events(result, "email_verification_sent")) == 2
 
 
 def test_resend_rate_limit_is_reported_without_false_success(tmp_path):
@@ -857,7 +893,7 @@ def test_resend_rate_limit_is_reported_without_false_success(tmp_path):
         },
     )
     assert len(email_posts(result)) == 2, result["requests"]
-    assert "Too many attempts. Please wait a minute, then try again." in result["html"]
+    assert "Too many attempts. Please wait about 15 minutes, then try again." in result["html"]
     assert "on its way" not in result["html"]
     resend = next(
         m
@@ -930,3 +966,34 @@ def test_login_prompt_is_mobile_and_keyboard_ready():
     assert "document.createElement('button')" in source
     assert "document.createElement('input')" in source
     assert "document.createElement('label')" in source
+
+
+def test_my_projects_load_failure_has_alert_role(tmp_path):
+    result = run(
+        tmp_path,
+        "my_projects.html",
+        [{"fn": "loadProjects", "args": []}],
+        fetch={"/api/projects/my/list": {"status": 500, "body": {}}},
+        read={"byId": "content"},
+    )
+    assert 'role="alert"' in result["ids"].get("content", "")
+
+
+def test_project_submit_login_gate_has_alert_role(tmp_path):
+    result = run(
+        tmp_path,
+        "index.html",
+        [{"fn": "showProjectInlineLoginPrompt", "args": []}],
+        read={"byId": "message"},
+    )
+    assert result["flags"]["message"]["role"] == "alert"
+
+
+def test_feedback_login_gate_has_alert_role(tmp_path):
+    result = run(
+        tmp_path,
+        "project_detail.html",
+        [{"fn": "showInlineLoginPrompt", "args": []}],
+        location="/project/1",
+    )
+    assert result["flags"]["message"]["role"] == "alert"

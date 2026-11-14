@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <meta name="description" content="Stop getting &quot;Looks good.&quot; Ask one question about what you built. Get focused feedback from real people.">
 
     <!-- Open Graph -->
@@ -14,10 +15,12 @@
     <meta property="og:image:type" content="image/webp">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Critique — Ask one question. Get real answers.">
     <meta property="og:image" content="https://critique.page/static/og-image.png">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Critique — Ask one question. Get real answers.">
     <meta property="og:site_name" content="Critique">
 
     <!-- Twitter Card -->
@@ -25,7 +28,31 @@
     <meta name="twitter:title" content="Critique — Ask one question. Get real answers.">
     <meta name="twitter:description" content="Stop getting &quot;Looks good.&quot; Get focused feedback from real people who actually take the time to look.">
     <meta name="twitter:image" content="https://critique.page/static/og-image.webp">
+    <meta name="twitter:image:alt" content="Critique — Ask one question. Get real answers.">
     <title>Critique — Ask one question. Get real answers.</title>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "SoftwareApplication",
+                "@id": "https://critique.page/#application",
+                "name": "Critique",
+                "url": "https://critique.page/",
+                "description": "Ask one question about what you built. Get focused feedback from real people.",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web browser",
+                "publisher": {"@id": "https://critique.page/#organization"}
+            },
+            {
+                "@type": "Organization",
+                "@id": "https://critique.page/#organization",
+                "name": "Critique",
+                "url": "https://critique.page/"
+            }
+        ]
+    }
+    </script>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="/static/shared.css">
     <style>
@@ -37,11 +64,11 @@
 
         .hero h1 {
             font-size: var(--text-3xl);
-            font-weight: 700;
+            font-weight: 800;
             color: var(--text-primary);
             margin-bottom: var(--space-3);
-            letter-spacing: -0.02em;
-            line-height: 1.2;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
         }
 
         .hero .subheadline {
@@ -282,7 +309,7 @@
         .project-title {
             font-size: var(--text-lg);
             font-weight: 700;
-            margin-bottom: var(--space-2);
+            margin: 0 0 var(--space-2) 0;
             color: var(--text-primary);
             overflow-wrap: anywhere;
         }
@@ -298,7 +325,7 @@
         }
 
         .project-question {
-            font-size: var(--text-sm);
+            font-size: var(--text-base);
             font-weight: 600;
             color: var(--text-primary);
             margin-bottom: var(--space-4);
@@ -307,6 +334,7 @@
             border-left: 3px solid var(--accent);
             border-radius: 0 var(--radius-md) var(--radius-md) 0;
             overflow-wrap: anywhere;
+            line-height: 1.5;
         }
 
         .project-footer {
@@ -1044,9 +1072,17 @@
             font-weight: 600;
         }
 
-        .example-good {
-            color: var(--success);
-            font-weight: 600;
+        .question-examples {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--space-2);
+            margin-top: var(--space-3);
+        }
+
+        .question-examples .btn {
+            white-space: normal;
+            text-align: left;
         }
 
         /* The question is the point of Critique, so its section carries the
@@ -1154,6 +1190,7 @@
     </style>
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <header class="navbar">
         <a href="/" class="navbar-brand" aria-current="page">
             <img src="/static/logo.svg" alt="Critique" width="32" height="32">
@@ -1171,7 +1208,7 @@
         </nav>
     </header>
 
-    <main class="container-wide" style="max-width: 1100px;">
+    <main id="main-content" class="container-wide" style="max-width: 1100px;">
         <!-- Shown on load when the backend redirects here with ?error=email_link
              (expired, already-used, or invalid magic link). It sits at the very
              top of the page, outside the submit form and before the script that
@@ -1446,30 +1483,11 @@
             <a href="/discover" class="btn btn-secondary">Explore projects</a>
         </section>
 
-        <section class="early-community">
-            <p class="eyebrow">Built something?</p>
-            <h2>Your project deserves more than "Looks good."</h2>
-            <p class="supporting">Share what you're building, ask one question, and get real feedback from people who actually take the time to look.</p>
-
-            <div class="benefits">
-                <div class="benefit"><span class="benefit-icon">✓</span> Find what people actually understand</div>
-                <div class="benefit"><span class="benefit-icon">✓</span> Discover what's confusing before you launch</div>
-                <div class="benefit"><span class="benefit-icon">✓</span> Get honest opinions from real builders</div>
-            </div>
-
-            <div class="cta-wrapper">
-                <a href="#submit" class="btn btn-primary" style="font-size:var(--text-base);padding:var(--space-3) var(--space-6);">Get feedback on my project →</a>
-                <p class="cta-sub">Free · One question · Real people</p>
-            </div>
-
-            <p class="reciprocity">Give feedback to a builder. Get feedback on your own.</p>
-        </section>
-
         <!-- Hierarchy: what the project is -> what it does -> the one question
              worth answering -> anything extra. The question gets the emphasis,
              because it is the reason this form exists. -->
         <section id="submit" class="card" style="max-width: 620px; margin: 0 auto;">
-            <form id="project-form">
+            <form id="project-form" aria-describedby="message">
                 <div class="form-header">
                     <h3>Share your project</h3>
                     <p class="form-subtitle">Tell us what you're building and what you want to learn.</p>
@@ -1485,7 +1503,7 @@
 
                     <div class="form-group">
                         <label class="form-label" for="url">Project URL <span class="form-optional-tag">optional</span></label>
-                        <input class="form-input" type="url" id="url" name="url" maxlength="500" placeholder="https://your-project.com">
+                        <input class="form-input" type="url" id="url" name="url" maxlength="500" placeholder="https://your-project.com" autocomplete="url">
                     </div>
                 </div>
 
@@ -1509,7 +1527,7 @@
 
                     <div class="form-examples">
                         <p><span class="example-bad">Too broad:</span> "What do you think of my app?"</p>
-                        <p><span class="example-good">Better:</span> "Is it immediately clear what my app does?"</p>
+                        <div id="question-examples" class="question-examples" role="group" aria-label="Example questions"></div>
                     </div>
                 </div>
 
@@ -1519,14 +1537,14 @@
                     <div class="form-group">
                         <label class="form-label" for="image_url">Project screenshot <span class="form-optional-tag">optional</span></label>
                         <p class="form-helper">Help others see what you've built.</p>
-                        <input class="form-input" type="url" id="image_url" name="image_url" maxlength="500" placeholder="https://example.com/screenshot.png">
+                        <input class="form-input" type="url" id="image_url" name="image_url" maxlength="500" placeholder="https://example.com/screenshot.png" autocomplete="url">
                         <p class="form-helper">Paste a direct link to an image. Leave blank if you don't have one.</p>
                     </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-submit" id="submit-btn">Submit for feedback</button>
                 <p class="form-reassurance">Free to use. Human feedback. No AI-generated responses.</p>
-                <div class="message" id="message"></div>
+                <div class="message" id="message" role="alert" aria-live="polite"></div>
             </form>
         </section>
 
@@ -1749,7 +1767,7 @@
                     html += screenshot;
                     html += '<div class="project-card-body">';
                     html += '<div class="eyebrow">Need feedback on</div>';
-                    html += '<div class="project-title">' + escapeHtml(project.title) + '</div>';
+                    html += '<h3 class="project-title">' + escapeHtml(project.title) + '</h3>';
                     html += description;
                     html += '<div class="project-question">Question: ' + escapeHtml(question) + '</div>';
                     html += '<div class="project-footer">';
@@ -1759,6 +1777,9 @@
                     html += '</div></div>';
                 });
                 container.innerHTML = html;
+                container.querySelectorAll('.project-screenshot').forEach(function(img) {
+                    img.addEventListener('error', function() { this.style.display = 'none'; });
+                });
             } catch (e) {
                 // The placeholder may never be the end state: report the failure
                 // and give the visitor a way to retry instead of showing an
@@ -1783,6 +1804,31 @@
         }
 
         // ===== Project form state persistence =====
+        function renderQuestionExamples() {
+            var container = document.getElementById('question-examples');
+            container.innerHTML = '';
+            [
+                'Is the main purpose of this website clear within the first 5 seconds?',
+                'Which part of this onboarding flow feels confusing?',
+                'Does my portfolio communicate my skills and experience clearly?',
+                'Is the navigation easy to understand?',
+                'Would you understand what this product offers and who it is for?'
+            ].forEach(function (text) {
+                var button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'btn btn-secondary';
+                button.textContent = text;
+                button.addEventListener('click', function () {
+                    var question = document.getElementById('question');
+                    question.value = text;
+                    question.focus();
+                    saveProjectDraft();
+                });
+                container.appendChild(button);
+            });
+        }
+        renderQuestionExamples();
+
         function projectStorageKey() {
             return 'critique_project_draft';
         }
@@ -1829,6 +1875,7 @@
         // it and stays completely optional.
         function showProjectLive(data) {
             var msg = document.getElementById('message');
+            if (msg) msg.setAttribute('role', 'status');
             var project = data && data.project;
             if (!project || !project.id || typeof CritiqueShare === 'undefined') {
                 // The 201 still confirms creation even if the body is not the
@@ -1847,6 +1894,7 @@
         function showProjectInlineLoginPrompt(msg, message) {
             msg = msg || document.getElementById('message');
             if (!msg) return;
+            msg.setAttribute('role', 'alert');
             // The prompt re-renders whenever the gate appears again (the submit
             // handler clears #message first) but the analytics event fires only
             // once per page.
@@ -1888,6 +1936,32 @@
             } catch (e) {}
         }
 
+        var projectFormDirty = false;
+        function updateProjectFormDirty() {
+            var titleEl = document.getElementById('title');
+            var descEl = document.getElementById('description');
+            var urlEl = document.getElementById('url');
+            var qEl = document.getElementById('question');
+            var title = (titleEl && titleEl.value) ? titleEl.value.trim() : '';
+            var desc = (descEl && descEl.value) ? descEl.value.trim() : '';
+            var url = (urlEl && urlEl.value) ? urlEl.value.trim() : '';
+            var question = (qEl && qEl.value) ? qEl.value.trim() : '';
+            projectFormDirty = Boolean(title || desc || url || question);
+        }
+
+        var pForm = document.getElementById('project-form');
+        if (pForm) {
+            pForm.addEventListener('input', updateProjectFormDirty);
+            pForm.addEventListener('change', updateProjectFormDirty);
+        }
+
+        window.addEventListener('beforeunload', function(e) {
+            if (projectFormDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
         document.getElementById('project-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const msg = document.getElementById('message');
@@ -1923,6 +1997,7 @@
                     window.CritiqueAnalytics.trackEvent('project_submit', null);
                     CritiqueUI.showToast('Project submitted', 'success');
                     clearProjectDraft();
+                    projectFormDirty = false;
                     document.getElementById('project-form').reset();
                     showProjectLive(data);
                 } else if (response.status === 401) {
@@ -1933,13 +2008,18 @@
                     // the page, so keep the project first.
                     saveProjectDraft();
                     msg.className = 'alert alert-error';
+                    msg.setAttribute('role', 'alert');
                     msg.textContent = 'Session expired. Your project is saved — refresh and try again.';
                 } else {
                     msg.className = 'alert alert-error';
-                    msg.textContent = 'Error: ' + JSON.stringify(data);
+                    msg.setAttribute('role', 'alert');
+                    msg.textContent = (data && typeof data.detail === 'string')
+                        ? data.detail
+                        : 'Failed to submit project. Please try again.';
                 }
             } catch (error) {
                 msg.className = 'alert alert-error';
+                msg.setAttribute('role', 'alert');
                 msg.textContent = 'Network error.';
             } finally {
                 const submitBtn = document.getElementById('submit-btn');
@@ -2120,6 +2200,14 @@
                     </ul>
                 </div>
             </div>
+        </div>
+        <div class="footer-star">
+            <p class="footer-star-text">Like what we're building? Support open source development by starring Critique on GitHub.</p>
+            <a href="https://github.com/BistaDinesh03/critique" target="_blank" rel="noopener noreferrer" class="btn btn-secondary footer-star-btn" aria-label="Star Critique on GitHub">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Star Critique on GitHub
+            </a>
         </div>
         <div class="footer-bottom">
             <span>© 2026 Critique · Open source · Free to use</span>

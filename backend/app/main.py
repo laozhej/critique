@@ -7,7 +7,7 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exception_handlers import http_exception_handler
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -73,14 +73,34 @@ class CacheControlMiddleware(BaseHTTPMiddleware):
             if settings.HSTS_PRELOAD:
                 hsts_val += "; preload"
             response.headers.setdefault("Strict-Transport-Security", hsts_val)
+        csp = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data: https:; "
+            "font-src 'self' data:; "
+            "connect-src 'self'; "
+            "frame-ancestors 'none'; "
+            "frame-src 'none'; "
+            "object-src 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self'"
+        )
+        response.headers.setdefault("Content-Security-Policy", csp)
         return response
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize database on startup."""
+    """Initialize database on startup and gracefully clean up on shutdown."""
     init_db()
     yield
+    # Graceful shutdown: release database pool connections
+    try:
+        from app.database import engine
+        engine.dispose()
+    except Exception:
+        pass
 
 
 app = FastAPI(
@@ -227,6 +247,16 @@ def google_verification():
     if not file_path.is_file():
         raise HTTPException(status_code=404, detail="Verification file not found")
     return HTMLResponse(content=file_path.read_text(encoding="utf-8"))
+
+
+@app.get("/.well-known/security.txt", response_class=PlainTextResponse)
+def security_txt():
+    """Serve RFC 9116 security.txt contact and disclosure policy."""
+    static_dir = Path(__file__).resolve().parent.parent.parent / "static"
+    file_path = static_dir / ".well-known" / "security.txt"
+    if not file_path.is_file():
+        raise HTTPException(status_code=404, detail="security.txt not found")
+    return PlainTextResponse(content=file_path.read_text(encoding="utf-8"), media_type="text/plain")
 
 
 @app.get("/health")
